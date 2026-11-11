@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session 006 transcript</title>
+<style>
+:root {
+  --page: #ffffff;
+  --ink: #1f1f1f;
+  --faint: #e4e4e4;
+  --panel: #f6f6f6;
+  --tone-milestone: #2a5db0;
+  --tone-good: #256029;
+  --tone-warn: #8a6100;
+  --tone-bad: #a31515;
+  --tone-muted: #6b6b6b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #1e1e1e;
+    --ink: #d4d4d4;
+    --faint: #3a3a3a;
+    --panel: #252526;
+  --tone-milestone: #3874db;
+  --tone-good: #54a33b;
+  --tone-warn: #b79427;
+  --tone-bad: #f14c4c;
+  --tone-muted: #8c8c8c;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 24px 16px 64px;
+  background: var(--page);
+  color: var(--ink);
+  font: 14px/1.6 ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+}
+main { max-width: 68rem; margin: 0 auto; }
+h1 { font-size: 1.4rem; margin: 0 0 .25rem; }
+h2 { font-size: 1.05rem; margin: 2.5rem 0 .75rem; border-bottom: 1px solid var(--faint); padding-bottom: .3rem; }
+.stamp { color: var(--tone-muted); font-size: .85rem; margin: 0 0 .25rem; }
+.mono, pre, code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+.lines { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13px; }
+.line { white-space: pre-wrap; word-break: break-word; padding-left: 10.5ch; text-indent: -10.5ch; }
+.at { color: var(--tone-muted); }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: left; padding: .35rem .6rem; border-bottom: 1px solid var(--faint); vertical-align: top; }
+th { color: var(--tone-muted); font-weight: 600; }
+details { margin: .5rem 0; }
+summary { cursor: pointer; }
+td details { margin: 0; }
+tr:has(details:not([open])) + tr.findings { display: none; }
+tr.findings > td { padding: 0 0 .5rem 1.5rem; }
+pre { background: var(--panel); padding: .75rem; overflow-x: auto; white-space: pre-wrap; word-break: break-word; font-size: 12.5px; }
+.stop, .cancelled { border-left: 3px solid var(--tone-bad); background: var(--panel); padding: .6rem .9rem; }
+.milestone { color: var(--tone-milestone); }
+.good { color: var(--tone-good); }
+.warn { color: var(--tone-warn); }
+.bad { color: var(--tone-bad); }
+.muted { color: var(--tone-muted); }
+</style>
+</head>
+<body>
+<main>
+<h1>Session 006 transcript</h1>
+<p class="stamp">Rendered 2026-11-11T13:52:22.042Z by dabbler-ai-router 3.32.1 at b4318b390a8946218ab9bbb95fb39ae9937bd954.</p>
+<p class="stamp">Engine cli, last phase <span class="milestone">log</span>, started 2026-11-11T08:50:02.690-05:00.</p>
+<h2>Session Plan</h2>
+<h3>Session 6: Test hardening for the model and the CSV reader</h3>
+<p>This session adds tests for the work sessions 4 and 5 landed, and writes no new feature. It was inserted ahead of the database layer, so the two sessions after it moved up one number; neither had started.</p>
+<ol><li>Register.</li><li>Extend <code>tests/CsvParser.Tests/PersonTests.cs</code>: inequality when only <code>Id</code> differs and when only <code>Email</code> differs (the session 4 review's open nit); a <code>with</code> copy changes one property and leaves the original unchanged; positional deconstruction returns <code>Id</code>, <code>Name</code>, <code>Email</code> and <code>Age</code> in that order. Check: <code>dotnet test CsvParser.slnx --blame-hang-timeout 5m --filter PersonTests</code>.</li><li>Extend <code>tests/CsvParser.Tests/CsvPersonReaderTests.cs</code> with the file and header cases of the CsvDeserializer contract:</li></ol>
+<ul><li>a <code>*.csv</code> file in a subfolder is not read, and a file with another extension (<code>notes.txt</code>) is not read;</li><li>file order is ordinal, not culture order: <code>B.csv</code> is read before <code>a.csv</code>;</li><li>columns in another order (<code>age,name,email</code>) and an extra column (<code>name,email,age,city</code>) still map correctly, and the extra column is ignored;</li><li>a file with a header row and no data rows gives no people and no errors;</li><li>a UTF-8 file with a byte-order mark, and non-ASCII names (<code>Zoë</code>, <code>山田</code>), read back exactly;</li><li>errors from several files come back in file order, and one bad file does not stop the files after it.</li></ul>
+<p>Check: <code>dotnet test CsvParser.slnx --blame-hang-timeout 5m --filter CsvPersonReaderTests</code>.</p>
+<ol><li>Extend the same file with the row cases:</li></ol>
+<ul><li><code>age</code> values <code>30.5</code>, empty and <code>99999999999</code> are each skipped with one error; <code>0</code> and <code>-5</code> are integers and are accepted;</li><li>a whitespace-only <code>name</code> or <code>email</code> is skipped with one error;</li><li>a row with too few fields is skipped with one error, and the rows after it are still read;</li><li>a quoted field holding a comma (<code>&quot;Smith, Ann&quot;</code>) is read as one value;</li><li>two bad rows in one file give two errors, in row order, each with its own line number and a non-empty <code>Message</code>;</li><li>two identical valid rows are both returned (nothing de-duplicates).</li></ul>
+<p>Check: <code>dotnet test CsvParser.slnx --blame-hang-timeout 5m --filter CsvPersonReaderTests</code>.</p>
+<p>The contract in <code>docs/planning/solution-plan.md</code> decides what each test expects. Where a new test fails against the code as it stands, fix the source under <code>src/</code> with the smallest change that meets the contract and name that file in the report; never weaken or drop the test. Quoted fields that span lines are left out: the contract does not say which line number such a row reports.</p>
+<h2>Work Plan</h2>
+<p>Session 6 adds tests only for the contracts that sessions 4 and 5 delivered; it writes no new feature. Three steps: first, PersonTests gains an inequality test for a change in Id alone and one for a change in Email alone, a 'with' copy test that changes one property and leaves the original unchanged, and a positional deconstruction test that returns Id, Name, Email and Age in that order. Second, CsvPersonReaderTests gains the file and header cases of the CsvDeserializer contract: a .csv in a subfolder and a .txt file are not read; file order is ordinal (B.csv before a.csv); columns in another order and an extra ignored column still map; a header-only file gives no people and no errors; a UTF-8 byte-order-mark file and non-ASCII names read back exactly; errors from several files come back in file order and a bad file does not stop the ones after it. Third, the same test file gains the row cases: age 30.5, empty and 99999999999 are each skipped with one error while 0 and -5 are accepted; a whitespace-only name or email is skipped with one error; a row with too few fields is skipped with one error and the rows after it are still read; a quoted field holding a comma is one value; two bad rows give two errors in row order, each with its line number and a non-empty Message; two identical valid rows are both returned. The contract in docs/planning/solution-plan.md decides each expectation. Where a new test fails against the current source, the step makes the smallest source change under src/CsvDeserializer that meets the contract and names that file in its report; no test is weakened or dropped.</p>
+<p>Landed <a href="https://github.com/darndestdabbler/darndestdabbler-csv-parser-dotnet/commit/bd43db62388f51452d51cd190cb1c013374da011"><code>bd43db62388f51452d51cd190cb1c013374da011</code></a>.</p>
+<table>
+<tr><th>Step</th><th>Ask</th><th>Files</th><th>Checks</th><th>Accepted</th></tr>
+<tr><td>Person tests</td><td><p>Extend tests/CsvParser.Tests/PersonTests.cs with: an inequality test when only Id differs; an inequality test when only Email differs; a test that a 'with' copy changing one property leaves the original unchanged; and a test that positional deconstruction returns Id, Name, Email and Age in that order. Keep each test small and named after its behaviour, in the file's existing style.</p></td><td><span class="mono">tests/CsvParser.Tests/PersonTests.cs</span></td><td><code>dotnet test CsvParser.slnx --blame-hang-timeout 5m --filter PersonTests</code></td><td>yes</td></tr>
+<tr><td>Reader file cases</td><td><p>Extend tests/CsvParser.Tests/CsvPersonReaderTests.cs with the file and header cases: a *.csv in a subfolder is not read and a notes.txt file is not read; file order is ordinal so B.csv is read before a.csv; columns in the order age,name,email and a file with an extra column (name,email,age,city) map correctly with the extra column ignored; a header-only file gives no people and no errors; a UTF-8 file with a byte-order mark and non-ASCII names (Zoë, 山田) read back exactly; errors from several files come back in file order and one bad file does not stop the files after it. Use the existing TempFolder and WriteFile helpers. If a new test fails against src/CsvDeserializer/CsvPersonReader.cs, make the smallest source change that meets the contract and name that file in the report; never weaken or drop the test.</p></td><td><span class="mono">tests/CsvParser.Tests/CsvPersonReaderTests.cs</span></td><td><code>dotnet test CsvParser.slnx --blame-hang-timeout 5m --filter CsvPersonReaderTests</code></td><td>yes</td></tr>
+<tr><td>Reader row cases</td><td><p>Extend tests/CsvParser.Tests/CsvPersonReaderTests.cs with the row cases: age values 30.5, empty and 99999999999 are each skipped with one error, while 0 and -5 are accepted as integers; a whitespace-only name or email is skipped with one error; a row with too few fields is skipped with one error and the rows after it are still read; a quoted field holding a comma (&quot;Smith, Ann&quot;) is read as one value; two bad rows in one file give two errors in row order, each with its own line number and a non-empty Message; two identical valid rows are both returned. Use the existing helpers. If a new test fails against src/CsvDeserializer/CsvPersonReader.cs, make the smallest source change that meets the contract and name that file in the report; never weaken or drop the test.</p></td><td><span class="mono">tests/CsvParser.Tests/CsvPersonReaderTests.cs</span></td><td><code>dotnet test CsvParser.slnx --blame-hang-timeout 5m --filter CsvPersonReaderTests</code></td><td>yes</td></tr>
+</table>
+<p>Non-goals:</p>
+<ul><li>No new feature and no change to the public API of Person, CsvPersonReader, CsvReadResult or CsvRecordError beyond what a failing test forces.</li><li>No quoted fields that span lines: the contract does not say which line number such a row reports.</li><li>No database layer, repository, DbContext or migration work; that is session 7.</li><li>No de-duplication of people, no configurable delimiters or encodings, and no recursive folder scan.</li><li>No changes to the solution structure, project files or dabbler.yaml, and no edits to the test files other than the two named ones.</li></ul>
+<h2>What the framework said</h2>
+<div class="lines"><div class="line"><span class="at">[13:50:02]</span> <span class="muted">run-started</span> session=006 mode=pull</div>
+<div class="line"><span class="at">[13:50:02]</span> <span class="muted">instruction-issued</span> seq=1 kind=step step=plan</div>
+<div class="line"><span class="at">[13:50:24]</span> <span class="muted">run-resumed</span> session=006 phase=<span class="milestone">plan</span> mode=pull</div>
+<div class="line"><span class="at">[13:50:24]</span> <span class="muted">plan-accepted</span> steps=[&quot;person-tests&quot;,&quot;reader-file-cases&quot;,&quot;reader-row-cases&quot;] non_goals=5</div>
+<div class="line"><span class="at">[13:50:24]</span> <span class="milestone">phase</span> phase=<span class="milestone">work</span></div>
+<div class="line"><span class="at">[13:50:24]</span> <span class="muted">instruction-issued</span> seq=2 kind=step step=person-tests</div>
+<div class="line"><span class="at">[13:50:40]</span> <span class="muted">run-resumed</span> session=006 phase=<span class="milestone">work</span> mode=pull</div>
+<div class="line"><span class="at">[13:50:43]</span> <span class="muted">check-passed</span> step=person-tests argv=[&quot;dotnet&quot;,&quot;test&quot;,&quot;CsvParser.slnx&quot;,&quot;--blame-hang-timeout&quot;,&quot;5m&quot;,&quot;--filter&quot;,&quot;PersonTests&quot;]</div>
+<div class="line"><span class="at">[13:50:43]</span> <span class="muted">report-accepted</span> seq=2 step=person-tests files=[&quot;tests/CsvParser.Tests/PersonTests.cs&quot;] notes=Added Id-only and Email-only inequality tests, a with-copy test and a deconstruction test to PersonTests.cs</div>
+<div class="line"><span class="at">[13:50:43]</span> <span class="muted">instruction-issued</span> seq=3 kind=step step=reader-file-cases</div>
+<div class="line"><span class="at">[13:51:07]</span> <span class="muted">run-resumed</span> session=006 phase=<span class="milestone">work</span> mode=pull</div>
+<div class="line"><span class="at">[13:51:07]</span> <span class="muted">step-file-unchanged</span> step=reader-file-cases file=src/CsvDeserializer/CsvPersonReader.cs</div>
+<div class="line"><span class="at">[13:51:10]</span> <span class="muted">check-passed</span> step=reader-file-cases argv=[&quot;dotnet&quot;,&quot;test&quot;,&quot;CsvParser.slnx&quot;,&quot;--blame-hang-timeout&quot;,&quot;5m&quot;,&quot;--filter&quot;,&quot;CsvPersonReaderTests&quot;]</div>
+<div class="line"><span class="at">[13:51:10]</span> <span class="muted">report-accepted</span> seq=3 step=reader-file-cases files=[&quot;tests/CsvParser.Tests/CsvPersonReaderTests.cs&quot;] notes=Added file and header cases to CsvPersonReaderTests.cs; all pass against the existing reader, no source change</div>
+<div class="line"><span class="at">[13:51:10]</span> <span class="muted">instruction-issued</span> seq=4 kind=step step=reader-row-cases</div>
+<div class="line"><span class="at">[13:51:31]</span> <span class="muted">run-resumed</span> session=006 phase=<span class="milestone">work</span> mode=pull</div>
+<div class="line"><span class="at">[13:51:31]</span> <span class="muted">step-file-unchanged</span> step=reader-row-cases file=src/CsvDeserializer/CsvPersonReader.cs</div>
+<div class="line"><span class="at">[13:51:34]</span> <span class="muted">check-passed</span> step=reader-row-cases argv=[&quot;dotnet&quot;,&quot;test&quot;,&quot;CsvParser.slnx&quot;,&quot;--blame-hang-timeout&quot;,&quot;5m&quot;,&quot;--filter&quot;,&quot;CsvPersonReaderTests&quot;]</div>
+<div class="line"><span class="at">[13:51:34]</span> <span class="muted">report-accepted</span> seq=4 step=reader-row-cases files=[&quot;tests/CsvParser.Tests/CsvPersonReaderTests.cs&quot;] notes=Added row cases to CsvPersonReaderTests.cs; all pass against the existing reader, no source change</div>
+<div class="line"><span class="at">[13:51:34]</span> <span class="milestone">phase</span> phase=<span class="milestone">preverify</span></div>
+<div class="line"><span class="at">[13:51:34]</span> <span class="milestone">phase</span> phase=<span class="milestone">verify</span></div>
+<div class="line"><span class="at">[13:51:34]</span> <span class="muted">job-started</span> name=verification pid=9928 log=.dabbler/runs/s6/driver/jobs/verification.log</div>
+<div class="line"><span class="at">[13:52:12]</span> <span class="muted">job-finished</span> name=verification exit=<span class="good">0</span> log=.dabbler/runs/s6/driver/jobs/verification.log</div>
+<div class="line"><span class="at">[13:52:12]</span> <span class="muted">verification-passed</span></div>
+<div class="line"><span class="at">[13:52:12]</span> <span class="milestone">phase</span> phase=<span class="milestone">run-of-record</span></div>
+<div class="line"><span class="at">[13:52:12]</span> <span class="muted">run-of-record</span> suite=dotnet stage=final-full why=dotnet declares no select command=dotnet test CsvParser.slnx --blame-hang-timeout 5m</div>
+<div class="line"><span class="at">[13:52:13]</span> <span class="muted">job-started</span> name=run of record: dotnet pid=9404 log=.dabbler/runs/s6/driver/jobs/run-of-record-dotnet.log</div>
+<div class="line"><span class="at">[13:52:16]</span> <span class="muted">job-finished</span> name=run of record: dotnet exit=<span class="good">0</span> log=.dabbler/runs/s6/driver/jobs/run-of-record-dotnet.log</div>
+<div class="line"><span class="at">[13:52:16]</span> <span class="milestone">phase</span> phase=<span class="milestone">land</span></div>
+<div class="line"><span class="at">[13:52:18]</span> <span class="muted">landed</span> commit=bd43db62388f51452d51cd190cb1c013374da011</div>
+<div class="line"><span class="at">[13:52:18]</span> <span class="milestone">phase</span> phase=<span class="milestone">publish</span></div>
+<div class="line"><span class="at">[13:52:18]</span> <span class="muted">publish-skipped</span> reason=an ordinary session never publishes</div>
+<div class="line"><span class="at">[13:52:18]</span> <span class="milestone">phase</span> phase=<span class="milestone">close</span></div>
+<div class="line"><span class="at">[13:52:18]</span> <span class="muted">job-started</span> name=close pid=57256 log=.dabbler/runs/s6/driver/jobs/close.log</div>
+<div class="line"><span class="at">[13:52:22]</span> <span class="muted">job-finished</span> name=close exit=<span class="good">0</span> log=.dabbler/runs/s6/driver/jobs/close.log</div>
+<div class="line"><span class="at">[13:52:22]</span> <span class="milestone">phase</span> phase=<span class="milestone">log</span></div></div>
+<h2>Verification</h2>
+<table>
+<tr><th>Round</th><th>Phase</th><th>Verdict</th><th>Reviewer</th><th>Provider</th><th>Transport</th><th>Findings</th></tr>
+<tr><td>1</td><td>full</td><td><span class="good">VERIFIED</span></td><td>gpt-5.6-terra</td><td>openai</td><td>api</td><td>0</td></tr>
+</table>
+<h2>Test runs</h2>
+<table>
+<tr><th>Suite</th><th>Stage</th><th>Outcome</th><th>Duration</th><th>Passed</th><th>Failed</th><th>Skipped</th><th>Command</th></tr>
+<tr><td>dotnet</td><td>final-full</td><td><span class="good">passed</span></td><td>3s</td><td>32</td><td>0</td><td>0</td><td><span class="mono">dotnet test CsvParser.slnx --blame-hang-timeout 5m</span></td></tr>
+</table>
+<h2>Jobs</h2>
+<div><strong>close</strong> exit <span class="good">0</span> <span class="muted">(passed -- output not carried; dabbler transcript --full carries it)</span></div>
+<div><strong>run-of-record-dotnet</strong> exit <span class="good">0</span> <span class="muted">(passed -- output not carried; dabbler transcript --full carries it)</span></div>
+<div><strong>verification</strong> exit <span class="good">0</span> <span class="muted">(passed -- output not carried; dabbler transcript --full carries it)</span></div>
+</main>
+</body>
+</html>
