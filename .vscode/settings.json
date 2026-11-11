@@ -1,0 +1,5 @@
+{
+  "dabbler.authoringModel": "claude-haiku-5-5",
+  "dabbler.mechanicModel": "claude-opus-5-5",
+  "dabbler.auxiliaryModel": "gemini-4-argon"
+}
