@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CsvDatabase/CsvDatabase.csproj" />
+    <Project Path="src/CsvDeserializer/CsvDeserializer.csproj" />
+    <Project Path="src/CsvParserApp/CsvParserApp.csproj" />
+    <Project Path="src/PersonModel/PersonModel.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CsvParser.Tests/CsvParser.Tests.csproj" />
+  </Folder>
+</Solution>
