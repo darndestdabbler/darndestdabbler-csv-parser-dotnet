@@ -116,3 +116,68 @@ starting with the skeleton session.
 
 > Do NOT hand-author `sessions.json`. The first `session start`
 > bootstraps it from this plan — state files are the writers' job.
+
+### Session 3: Skeleton
+
+1. Register.
+2. Write `CsvParser.slnx` and the five SDK-style projects, all `net10.0`:
+   `src/PersonModel`, `src/CsvDeserializer`, `src/CsvDatabase`,
+   `src/CsvParserApp` (`OutputType=Exe`, with a placeholder `Program.cs`) and
+   `tests/CsvParser.Tests` (xUnit, referencing all four). Add the
+   `<ProjectReference>` graph from the plan's Dependency Graph section. Add
+   no package other than xUnit and the test SDK. Check: `dotnet build
+   CsvParser.slnx`.
+3. Declare the suite in `dabbler.yaml` under `testing.suites`: name
+   `dotnet`, command `dotnet test CsvParser.slnx --blame-hang-timeout 5m`,
+   `expensive: true`, covers `src` and `tests`, test root `tests`, test glob
+   `*Tests.cs`. No architecture test is added (see the plan's Rationale).
+   Check: `dotnet test CsvParser.slnx --blame-hang-timeout 5m` passes with
+   no tests.
+
+### Session 4: Domain model
+
+1. Register.
+2. Write `public record Person(int Id, string Name, string Email, int Age)`
+   in `src/PersonModel/Person.cs`, with no packages and no EF Core
+   attributes.
+3. Write `tests/CsvParser.Tests/PersonTests.cs` covering value equality, the
+   default `Id` of `0` and `ToString`. Check: `dotnet test CsvParser.slnx
+   --blame-hang-timeout 5m --filter PersonTests`.
+
+### Session 5: CSV deserialization
+
+1. Register.
+2. Write `CsvRecordError`, `CsvReadResult` and `CsvPersonReader.ReadFolder`
+   in `src/CsvDeserializer`, using the `CsvHelper` package, as the plan's
+   CsvDeserializer contract states.
+3. Write `tests/CsvParser.Tests/CsvPersonReaderTests.cs` with temp-folder
+   fixtures: valid files, a bad `age`, an empty `name`, missing headers, an
+   unparseable row, an empty folder and a folder that does not exist. Check:
+   `dotnet test CsvParser.slnx --blame-hang-timeout 5m --filter
+   CsvPersonReaderTests`.
+
+### Session 6: Database layer
+
+1. Register.
+2. Write `PersonDbContext`, its `People` mapping, the design-time factory and
+   `PersonRepository` in `src/CsvDatabase`, with the EF Core 10.x packages.
+   Add the `dotnet-ef` local tool in `.config/dotnet-tools.json` and generate
+   the `InitialCreate` migration. Check: `dotnet build CsvParser.slnx`.
+3. Write `tests/CsvParser.Tests/PersonRepositoryTests.cs` against a
+   per-class LocalDB database (`CsvParserTests_<guid>`, migrated, then
+   dropped): save and read back, `Id` order and an empty table. Check:
+   `dotnet test CsvParser.slnx --blame-hang-timeout 5m --filter
+   PersonRepositoryTests`.
+
+### Session 7: Console application
+
+1. Register.
+2. Write `CsvParserRunner.Run` and `Program.cs` in `src/CsvParserApp`, as
+   the plan's CsvParserApp contract states: arguments, the
+   `CSV_PARSER_CONNECTION_STRING` variable, migrations, stderr warnings,
+   stdout lines and exit codes `0`, `1` and `2`. Check: `dotnet build
+   CsvParser.slnx`.
+3. Write `tests/CsvParser.Tests/CsvParserRunnerTests.cs` running the whole
+   pipeline against a temp folder and a per-class LocalDB test database,
+   checking stdout, stderr and each exit code. Check: `dotnet test
+   CsvParser.slnx --blame-hang-timeout 5m --filter CsvParserRunnerTests`.

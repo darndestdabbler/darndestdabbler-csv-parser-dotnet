@@ -238,3 +238,51 @@ breakdown session).
 No release or packaging session is planned, because the brief puts
 distribution out of scope. The handoff commands above are documentation
 only.
+
+## Rationale
+
+Answers from the session 2 challenge of the cuts above.
+
+**PersonModel.** It stays. The brief requires four projects, and the real
+reason holds anyway: `CsvDeserializer` and `CsvDatabase` share `Person`, and
+putting it in either would pull CsvHelper or EF Core into the other. Its
+contract is proved by `PersonTests` (value equality, default `Id`,
+`ToString`).
+
+**CsvDeserializer.** It stays. Parsing rules need no database, so
+`CsvPersonReaderTests` proves every contract bullet with temp folders: valid
+files, bad `age`, missing headers, an empty folder and a missing folder. The
+CSV library is confined to this project.
+
+**CsvDatabase.** It stays. `PersonRepositoryTests` against per-class LocalDB
+databases proves save, read-back, `Id` order and the empty table. The EF Core
+and SQL Server provider is confined to this project, so changing provider
+touches nothing else.
+
+**CsvParserApp.** It stays. Arguments, environment and exit codes live here
+only, and `CsvParserRunnerTests` proves exit codes `0`, `1` and `2` and the
+stdout and stderr lines end to end.
+
+**Dependency direction.** The two decisions most likely to change, the CSV
+library and the database provider, each sit behind a leaf project that only
+`CsvParserApp` composes. Nothing depends on the app, and the two middle
+projects cannot see each other.
+
+**Deferred cuts, all staying deferred.** Each is outside the brief and a
+sample needs none of them:
+- `appsettings.json` and the generic host: one environment variable is
+  enough.
+- De-duplicating people across runs: the Java version does not either.
+- Async APIs: the app is sequential.
+- A generic repository: there is one entity.
+- Configurable delimiters and encodings, and recursive scans: the brief asks
+  for basic parsing only.
+- Validation attributes: the same reason.
+
+**No architecture test.** The rule that only `CsvDatabase` touches EF Core
+or SQL Server is enforced by `<ProjectReference>` items and by where the
+packages are referenced. A separate test would restate the project files, so
+none is added. The skeleton session still declares the test suite.
+
+**No packaging or release session.** The brief puts distribution out of
+scope, so the handoff commands stay documentation only.

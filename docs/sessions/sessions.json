@@ -14,7 +14,29 @@
         "identityProvenance": "direct"
       },
       "verificationVerdict": "VERIFIED",
-      "startCommit": "94f8f2ac858f936155ee99b0ec147e8ea21a383a",
+      "verification": {
+        "rounds": 1,
+        "verifierModel": "gpt-5.6-terra",
+        "verifierProvider": "openai",
+        "transport": "api"
+      },
+      "frameworkVersion": "3.32.1",
+      "startCommit": "94f8f2ac858f936155ee99b0ec147e8ea21a383a"
+    },
+    {
+      "number": 2,
+      "title": "Challenge the plan, then break it into numbered sessions",
+      "status": "in-progress",
+      "startedAt": "2026-11-11T08:26:20.676000-05:00",
+      "completedAt": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-sonnet-5-5",
+        "identityProvenance": "direct"
+      },
+      "verificationVerdict": "VERIFIED",
+      "startCommit": "acfaf7a52039476521a92ee32662e6e05f63568e",
       "frameworkVersion": "3.32.1",
       "verification": {
         "rounds": 1,
@@ -22,15 +44,6 @@
         "verifierProvider": "openai",
         "transport": "api"
       }
-    },
-    {
-      "number": 2,
-      "title": "Challenge the plan, then break it into numbered sessions",
-      "status": "not-started",
-      "startedAt": null,
-      "completedAt": null,
-      "orchestrator": null,
-      "verificationVerdict": null
     }
   ]
 }
