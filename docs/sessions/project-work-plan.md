@@ -16,7 +16,7 @@ The numbered sessions are declared from `session-plan.md`; each one's task is wh
 | 2 | Challenge the plan, then break it into numbered sessions | no | 2026-11-11 |
 | 3 | Skeleton | no | 2026-11-11 |
 | 4 | Domain model | no | 2026-11-11 |
-| 5 | CSV deserialization | — | not declared |
+| 5 | CSV deserialization | no | 2026-11-11 |
 | 6 | Database layer | — | not declared |
 | 7 | Console application | — | not declared |
 
@@ -43,3 +43,9 @@ Lay down the solution skeleton: CsvParser.slnx and five SDK-style net10.0 projec
 **Releasable: no.**
 
 Add the Person domain record in src/PersonModel/Person.cs (public record Person(int Id, string Name, string Email, int Age), no packages, no EF Core attributes) and cover it with tests in tests/CsvParser.Tests/PersonTests.cs for value equality, the default Id of 0 and ToString. Both projects already exist and reference each other, so no project files change.
+
+### Session 5 — CSV deserialization
+
+**Releasable: no.**
+
+Session 5 adds CSV deserialization to the CsvDeserializer project. It writes the two result types, CsvRecordError(FilePath, LineNumber, Message) and CsvReadResult(People, Errors), and the static reader CsvPersonReader.ReadFolder(folderPath), which reads every *.csv file directly in the folder in ordinal file-name order, maps the name, email and age columns (matched case-insensitively) to Person rows with Id = 0, and skips bad rows with one CsvRecordError each. The CsvHelper NuGet package is added to CsvDeserializer.csproj, and that project keeps its ProjectReference to PersonModel. CsvPersonReaderTests covers valid files, a bad age, an empty name, missing headers, an unparseable row, an empty folder and a missing folder, using temp-folder fixtures. The session follows the CsvDeserializer contract in docs/planning/solution-plan.md and the Session 5 section of docs/sessions/session-plan.md.
