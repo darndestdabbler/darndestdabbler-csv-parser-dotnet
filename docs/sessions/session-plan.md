@@ -156,7 +156,59 @@ starting with the skeleton session.
    `dotnet test CsvParser.slnx --blame-hang-timeout 5m --filter
    CsvPersonReaderTests`.
 
-### Session 6: Database layer
+### Session 6: Test hardening for the model and the CSV reader
+
+This session adds tests for the work sessions 4 and 5 landed, and writes no
+new feature. It was inserted ahead of the database layer, so the two
+sessions after it moved up one number; neither had started.
+
+1. Register.
+2. Extend `tests/CsvParser.Tests/PersonTests.cs`: inequality when only `Id`
+   differs and when only `Email` differs (the session 4 review's open nit);
+   a `with` copy changes one property and leaves the original unchanged;
+   positional deconstruction returns `Id`, `Name`, `Email` and `Age` in that
+   order. Check: `dotnet test CsvParser.slnx --blame-hang-timeout 5m
+   --filter PersonTests`.
+3. Extend `tests/CsvParser.Tests/CsvPersonReaderTests.cs` with the file and
+   header cases of the CsvDeserializer contract:
+   - a `*.csv` file in a subfolder is not read, and a file with another
+     extension (`notes.txt`) is not read;
+   - file order is ordinal, not culture order: `B.csv` is read before
+     `a.csv`;
+   - columns in another order (`age,name,email`) and an extra column
+     (`name,email,age,city`) still map correctly, and the extra column is
+     ignored;
+   - a file with a header row and no data rows gives no people and no
+     errors;
+   - a UTF-8 file with a byte-order mark, and non-ASCII names (`Zoë`,
+     `山田`), read back exactly;
+   - errors from several files come back in file order, and one bad file
+     does not stop the files after it.
+
+   Check: `dotnet test CsvParser.slnx --blame-hang-timeout 5m --filter
+   CsvPersonReaderTests`.
+4. Extend the same file with the row cases:
+   - `age` values `30.5`, empty and `99999999999` are each skipped with one
+     error; `0` and `-5` are integers and are accepted;
+   - a whitespace-only `name` or `email` is skipped with one error;
+   - a row with too few fields is skipped with one error, and the rows
+     after it are still read;
+   - a quoted field holding a comma (`"Smith, Ann"`) is read as one value;
+   - two bad rows in one file give two errors, in row order, each with its
+     own line number and a non-empty `Message`;
+   - two identical valid rows are both returned (nothing de-duplicates).
+
+   Check: `dotnet test CsvParser.slnx --blame-hang-timeout 5m --filter
+   CsvPersonReaderTests`.
+
+The contract in `docs/planning/solution-plan.md` decides what each test
+expects. Where a new test fails against the code as it stands, fix the
+source under `src/` with the smallest change that meets the contract and
+name that file in the report; never weaken or drop the test. Quoted fields
+that span lines are left out: the contract does not say which line number
+such a row reports.
+
+### Session 7: Database layer
 
 1. Register.
 2. Write `PersonDbContext`, its `People` mapping, the design-time factory and
@@ -165,11 +217,46 @@ starting with the skeleton session.
    the `InitialCreate` migration. Check: `dotnet build CsvParser.slnx`.
 3. Write `tests/CsvParser.Tests/PersonRepositoryTests.cs` against a
    per-class LocalDB database (`CsvParserTests_<guid>`, migrated, then
-   dropped): save and read back, `Id` order and an empty table. Check:
-   `dotnet test CsvParser.slnx --blame-hang-timeout 5m --filter
-   PersonRepositoryTests`.
+   dropped), with every test starting from an empty `People` table:
+   - `SaveAll` returns the count saved, and every saved person has a
+     distinct `Id` greater than `0`;
+   - `GetAll` from a new context returns the same `Name`, `Email` and `Age`
+     values, ordered by `Id`, in the order they were passed to `SaveAll`;
+   - `GetAll` on an empty table returns an empty list, and `SaveAll` of an
+     empty sequence returns `0` and writes nothing;
+   - a second `SaveAll` adds to the first, and saving the same values twice
+     stores two rows;
+   - a 200-character `Name` and `Email` and non-ASCII text (`Zoë`, `山田`)
+     are stored and read back exactly;
+   - a batch holding one 201-character `Name` throws `DbUpdateException`
+     and leaves the table with the rows it had before (a failed `SaveAll`
+     writes no rows).
 
-### Session 7: Console application
+   Check: `dotnet test CsvParser.slnx --blame-hang-timeout 5m --filter
+   PersonRepositoryTests`.
+4. Write `tests/CsvParser.Tests/PersonDbContextTests.cs`, and a test file
+   named after the design-time factory's source file:
+   - the model maps `Person` to table `People`, with `Id` as the key and
+     generated on add, `Name` and `Email` required with a maximum length of
+     `200`, and `Age` required;
+   - after `Migrate()` on a new LocalDB database, `InitialCreate` is among
+     the applied migrations, none is pending, and
+     `HasPendingModelChanges()` is `false`, so the migration matches the
+     model;
+   - a second `Migrate()` on the same database changes nothing and does not
+     throw;
+   - the design-time factory returns a `PersonDbContext` on the SQL Server
+     provider whose connection string names `(localdb)\MSSQLLocalDB`; the
+     test opens no connection.
+
+   Check: `dotnet test CsvParser.slnx --blame-hang-timeout 5m --filter
+   "PersonDbContext"`.
+
+Every test database is `CsvParserTests_<guid>` on LocalDB and is dropped
+with `EnsureDeleted()` when its class finishes, including when a test
+fails. No in-memory provider stands in for SQL Server.
+
+### Session 8: Console application
 
 1. Register.
 2. Write `CsvParserRunner.Run` and `Program.cs` in `src/CsvParserApp`, as
@@ -178,6 +265,44 @@ starting with the skeleton session.
    stdout lines and exit codes `0`, `1` and `2`. Check: `dotnet build
    CsvParser.slnx`.
 3. Write `tests/CsvParser.Tests/CsvParserRunnerTests.cs` running the whole
-   pipeline against a temp folder and a per-class LocalDB test database,
-   checking stdout, stderr and each exit code. Check: `dotnet test
-   CsvParser.slnx --blame-hang-timeout 5m --filter CsvParserRunnerTests`.
+   pipeline through `CsvParserRunner.Run` against a temp folder and a
+   per-class LocalDB test database, with every test starting from an empty
+   `People` table:
+   - valid files: exit code `0`, stdout is exactly `name | email | age`
+     followed by one `<name> | <email> | <age>` line per person in `Id`
+     order, and stderr is empty;
+   - valid and bad rows together: one `warning: <file>:<line>: <message>`
+     line on stderr per skipped row or file, the valid rows saved and
+     printed, exit code `0`;
+   - an empty folder: the header line only, exit code `0`;
+   - a second run over the same folder prints the rows of both runs;
+   - a database that does not exist yet is created and migrated by `Run`
+     (this test uses its own database name and drops it);
+   - no argument, and two arguments: a usage line on stderr, nothing on
+     stdout, exit code `1`, and no row written;
+   - a folder that does not exist: an error line on stderr, exit code `1`;
+   - a connection string that cannot connect (a LocalDB instance that does
+     not exist, with a short `Connect Timeout`): one `error: <message>`
+     line on stderr, exit code `2`, and no stack-trace line (`   at `) on
+     either writer.
+
+   Check: `dotnet test CsvParser.slnx --blame-hang-timeout 5m --filter
+   CsvParserRunnerTests`.
+4. Write `tests/CsvParser.Tests/ProgramTests.cs`, which starts the built
+   `CsvParserApp` as a process (`dotnet <path to CsvParserApp.dll>`, found
+   beside the test assembly) so the parts `Run` does not cover are tested:
+   - with `CSV_PARSER_CONNECTION_STRING` set to a LocalDB test database and
+     a temp folder of valid files, the process exits with `0` and prints the
+     header and the rows, which proves `Program.cs` reads the variable;
+   - with no argument, the process exits with `1` and writes to stderr
+     only.
+
+   Each started process is given a time limit and is killed when it passes
+   it. The default connection string is not run against, so no test touches
+   the `CsvParser` database; a test asserts its value where `Program.cs`
+   exposes it. Check: `dotnet test CsvParser.slnx --blame-hang-timeout 5m
+   --filter ProgramTests`.
+
+Every test database is `CsvParserTests_<guid>` on LocalDB and is dropped
+with `EnsureDeleted()` when its class finishes, including when a test
+fails.

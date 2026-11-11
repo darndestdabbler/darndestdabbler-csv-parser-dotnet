@@ -232,8 +232,9 @@ breakdown session).
 | 3 | Skeleton | `CsvParser.slnx`; the four `src/` projects and `tests/CsvParser.Tests`, all `net10.0`, with the `<ProjectReference>` graph above and empty placeholders; a `dabbler.yaml` test suite running `dotnet test CsvParser.slnx`; the build and an empty test run pass |
 | 4 | Domain model | `Person` record; `PersonTests` covering value equality, the default `Id` and `ToString` |
 | 5 | CSV deserialization | `CsvPersonReader`, `CsvReadResult`, `CsvRecordError` using CsvHelper; `CsvPersonReaderTests` with temp-folder fixtures for valid files, a bad `age`, missing headers, an empty folder and a folder that doesn't exist |
-| 6 | Database layer | `PersonDbContext`, its mapping, the `InitialCreate` migration, the design-time factory, `PersonRepository`, and the `dotnet-ef` local tool; `PersonRepositoryTests` against a per-class LocalDB database (save and read back, `Id` order, an empty table) |
-| 7 | Console application | `CsvParserRunner` and `Program.cs`; `CsvParserRunnerTests` running the whole pipeline against a temp folder and a LocalDB test database, checking stdout lines, stderr warnings and exit codes `0`, `1` and `2` |
+| 6 | Test hardening | No new feature. More `PersonTests` and `CsvPersonReaderTests` cases for the contracts sessions 4 and 5 delivered: file selection and order, header and column variations, encoding, and row-level edge cases |
+| 7 | Database layer | `PersonDbContext`, its mapping, the `InitialCreate` migration, the design-time factory, `PersonRepository`, and the `dotnet-ef` local tool; `PersonRepositoryTests` against a per-class LocalDB database (save and read back, `Id` order, an empty table, size limits, a failed save writing nothing) and `PersonDbContextTests` (the mapping, and the migration matching the model) |
+| 8 | Console application | `CsvParserRunner` and `Program.cs`; `CsvParserRunnerTests` running the whole pipeline against a temp folder and a LocalDB test database, checking stdout lines, stderr warnings and exit codes `0`, `1` and `2`; `ProgramTests` starting the built app as a process |
 
 No release or packaging session is planned, because the brief puts
 distribution out of scope. The handoff commands above are documentation
