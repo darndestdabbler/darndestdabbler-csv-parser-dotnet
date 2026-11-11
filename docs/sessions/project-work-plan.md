@@ -19,7 +19,7 @@ The numbered sessions are declared from `session-plan.md`; each one's task is wh
 | 5 | CSV deserialization | no | 2026-11-11 |
 | 6 | Test hardening for the model and the CSV reader | no | 2026-11-11 |
 | 7 | Database layer | no | 2026-11-11 |
-| 8 | Console application | — | not declared |
+| 8 | Console application | no | 2026-11-11 |
 
 ### Session 1 — Author or import the solution plan
 
@@ -62,3 +62,9 @@ Session 6 adds tests only for the contracts that sessions 4 and 5 delivered; it 
 **Releasable: no.**
 
 Add the database layer to src/CsvDatabase: a PersonDbContext mapping Person to a People table (Id key and generated on add, Name and Email required with max length 200, Age required), a design-time factory that returns a PersonDbContext on SQL Server against (localdb)\MSSQLLocalDB, the EF Core 10.0.x packages, the dotnet-ef local tool in .config/dotnet-tools.json, and an InitialCreate migration; a PersonRepository with SaveAll(IEnumerable<Person>) returning the count saved and GetAll() returning the stored people ordered by Id; and tests against per-class LocalDB databases named CsvParserTests_<guid>, migrated then dropped with EnsureDeleted() when the class finishes, covering the repository behaviour and the context, migration and factory behaviour the session plan lists. Each step is one concern and is checked by building the solution or running the filtered tests it names. No code outside src/CsvDatabase and tests/CsvParser.Tests changes, and the existing projects and their references stay as they are.
+
+### Session 8 — Console application
+
+**Releasable: no.**
+
+Build the console application: a CsvParserRunner static class in src/CsvParserApp holding Run(string[] args, TextWriter stdout, TextWriter stderr, string connectionString), which validates the single folder argument, applies migrations, reads the folder with CsvPersonReader.ReadFolder, writes each CsvRecordError to stderr as a warning line, saves the valid people, and prints the header and every stored person ordered by Id to stdout, returning exit code 0, 1 (usage or missing folder) or 2 (database failure reported as an error line with no stack trace). Program.cs reads the CSV_PARSER_CONNECTION_STRING environment variable, falls back to a public default constant, and returns Run's exit code. Then two test files: CsvParserRunnerTests exercises the whole pipeline through Run against a temp folder and a per-class LocalDB database named CsvParserTests_<guid>, dropped with EnsureDeleted; ProgramTests starts the built CsvParserApp.dll as a process with a time limit to prove Program.cs reads the variable and that the no-argument case writes only to stderr. The existing solution, projects and CsvParser.Tests reference to CsvParserApp are adopted as they are; no project file changes.
