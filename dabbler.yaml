@@ -9,24 +9,14 @@
 schema_version: 1
 posture: greenfield  # no tracked source or build file when bootstrap ran: the framework lays out new projects. Changing this word to maintenance changes it.
 
-# No suite is declared, because nothing in this repository says how its
-# tests run. Setup reads what is there -- a pytest section, a
-# `scripts.test`, a POM or a solution at the root or two levels below it
-# -- and where none of it says how the tests run, it declares nothing
-# rather than emitting a command that would fail on its first use. That is
-# a declaration, not an omission.
-#
-# Declare the suite yourself -- a name, the command that runs it, the paths
-# it covers, and where its tests live:
-#
-#   testing:
-#     suites:
-#       - name: python
-#         command: python -m pytest
-#         expensive: true
-#         covers: ["."]
-#         test_roots: [tests]
-#         test_glob: "test_*.py"
+testing:
+  suites:
+    - name: dotnet
+      command: dotnet test CsvParser.slnx --blame-hang-timeout 5m
+      expensive: true
+      covers: [src, tests]
+      test_roots: [tests]
+      test_glob: "*Tests.cs"
 
 # Step (f) of the lifecycle: pack, then push to a feed. A session that
 # declared itself releasable publishes through these -- both argv, never

@@ -14,6 +14,11 @@ The numbered sessions are declared from `session-plan.md`; each one's task is wh
 | ---: | --- | --- | --- |
 | 1 | Author or import the solution plan | no | 2026-11-11 |
 | 2 | Challenge the plan, then break it into numbered sessions | no | 2026-11-11 |
+| 3 | Skeleton | no | 2026-11-11 |
+| 4 | Domain model | — | not declared |
+| 5 | CSV deserialization | — | not declared |
+| 6 | Database layer | — | not declared |
+| 7 | Console application | — | not declared |
 
 ### Session 1 — Author or import the solution plan
 
@@ -26,3 +31,9 @@ Author the solution plan for csv-parser-dotnet, a .NET 10 port of the csv-parser
 **Releasable: no.**
 
 Challenge the cuts in docs/planning/solution-plan.md (each module's existence, provability of its contract, dependency direction, deferred cuts) and record the answers as a Rationale section in that plan; then append the numbered work sessions (skeleton first, then model, CSV, database, console) to docs/sessions/session-plan.md. Writes plan documents only: no code, project, build file, test, dabbler.yaml suite or packaging.
+
+### Session 3 — Skeleton
+
+**Releasable: no.**
+
+Lay down the solution skeleton: CsvParser.slnx and five SDK-style net10.0 projects (src/PersonModel, src/CsvDeserializer, src/CsvDatabase, src/CsvParserApp as an Exe with a placeholder Program.cs, tests/CsvParser.Tests with xUnit and the test SDK referencing all four), wired with the ProjectReference graph from the plan (CsvDeserializer and CsvDatabase reference PersonModel; CsvParserApp references all three libraries). Then declare the 'dotnet' test suite in dabbler.yaml under testing.suites. No packages beyond xUnit and the test SDK.
