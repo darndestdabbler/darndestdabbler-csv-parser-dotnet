@@ -18,7 +18,7 @@ The numbered sessions are declared from `session-plan.md`; each one's task is wh
 | 4 | Domain model | no | 2026-11-11 |
 | 5 | CSV deserialization | no | 2026-11-11 |
 | 6 | Test hardening for the model and the CSV reader | no | 2026-11-11 |
-| 7 | Database layer | — | not declared |
+| 7 | Database layer | no | 2026-11-11 |
 | 8 | Console application | — | not declared |
 
 ### Session 1 — Author or import the solution plan
@@ -56,3 +56,9 @@ Session 5 adds CSV deserialization to the CsvDeserializer project. It writes the
 **Releasable: no.**
 
 Session 6 adds tests only for the contracts that sessions 4 and 5 delivered; it writes no new feature. Three steps: first, PersonTests gains an inequality test for a change in Id alone and one for a change in Email alone, a 'with' copy test that changes one property and leaves the original unchanged, and a positional deconstruction test that returns Id, Name, Email and Age in that order. Second, CsvPersonReaderTests gains the file and header cases of the CsvDeserializer contract: a .csv in a subfolder and a .txt file are not read; file order is ordinal (B.csv before a.csv); columns in another order and an extra ignored column still map; a header-only file gives no people and no errors; a UTF-8 byte-order-mark file and non-ASCII names read back exactly; errors from several files come back in file order and a bad file does not stop the ones after it. Third, the same test file gains the row cases: age 30.5, empty and 99999999999 are each skipped with one error while 0 and -5 are accepted; a whitespace-only name or email is skipped with one error; a row with too few fields is skipped with one error and the rows after it are still read; a quoted field holding a comma is one value; two bad rows give two errors in row order, each with its line number and a non-empty Message; two identical valid rows are both returned. The contract in docs/planning/solution-plan.md decides each expectation. Where a new test fails against the current source, the step makes the smallest source change under src/CsvDeserializer that meets the contract and names that file in its report; no test is weakened or dropped.
+
+### Session 7 — Database layer
+
+**Releasable: no.**
+
+Add the database layer to src/CsvDatabase: a PersonDbContext mapping Person to a People table (Id key and generated on add, Name and Email required with max length 200, Age required), a design-time factory that returns a PersonDbContext on SQL Server against (localdb)\MSSQLLocalDB, the EF Core 10.0.x packages, the dotnet-ef local tool in .config/dotnet-tools.json, and an InitialCreate migration; a PersonRepository with SaveAll(IEnumerable<Person>) returning the count saved and GetAll() returning the stored people ordered by Id; and tests against per-class LocalDB databases named CsvParserTests_<guid>, migrated then dropped with EnsureDeleted() when the class finishes, covering the repository behaviour and the context, migration and factory behaviour the session plan lists. Each step is one concern and is checked by building the solution or running the filtered tests it names. No code outside src/CsvDatabase and tests/CsvParser.Tests changes, and the existing projects and their references stay as they are.

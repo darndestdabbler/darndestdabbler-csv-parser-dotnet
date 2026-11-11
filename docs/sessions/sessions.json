@@ -124,7 +124,29 @@
         "identityProvenance": "direct"
       },
       "verificationVerdict": "VERIFIED",
-      "startCommit": "7bad1d14cfe7103d509f5ec7ed0495e2c20ce25c",
+      "verification": {
+        "rounds": 1,
+        "verifierModel": "gpt-5.6-terra",
+        "verifierProvider": "openai",
+        "transport": "api"
+      },
+      "frameworkVersion": "3.32.1",
+      "startCommit": "7bad1d14cfe7103d509f5ec7ed0495e2c20ce25c"
+    },
+    {
+      "number": 7,
+      "title": "Database layer",
+      "status": "in-progress",
+      "startedAt": "2026-11-11T08:53:15.847000-05:00",
+      "completedAt": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-haiku-5-5",
+        "identityProvenance": "direct"
+      },
+      "verificationVerdict": "VERIFIED",
+      "startCommit": "9c12196f28d24867066edbece7ac08456ab68fd5",
       "frameworkVersion": "3.32.1",
       "verification": {
         "rounds": 1,
@@ -132,15 +154,6 @@
         "verifierProvider": "openai",
         "transport": "api"
       }
-    },
-    {
-      "number": 7,
-      "title": "Database layer",
-      "status": "not-started",
-      "startedAt": null,
-      "completedAt": null,
-      "orchestrator": null,
-      "verificationVerdict": null
     },
     {
       "number": 8,
