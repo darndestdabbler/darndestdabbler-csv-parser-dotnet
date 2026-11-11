@@ -58,7 +58,29 @@
         "identityProvenance": "direct"
       },
       "verificationVerdict": "VERIFIED",
-      "startCommit": "c21f6dc63b536231ca562fb4596041c416f32475",
+      "verification": {
+        "rounds": 1,
+        "verifierModel": "gpt-5.6-terra",
+        "verifierProvider": "openai",
+        "transport": "api"
+      },
+      "frameworkVersion": "3.32.1",
+      "startCommit": "c21f6dc63b536231ca562fb4596041c416f32475"
+    },
+    {
+      "number": 4,
+      "title": "Domain model",
+      "status": "in-progress",
+      "startedAt": "2026-11-11T08:33:59.618000-05:00",
+      "completedAt": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-sonnet-5-5",
+        "identityProvenance": "direct"
+      },
+      "verificationVerdict": "VERIFIED",
+      "startCommit": "6b9d747d4dbfcff44c727ef3bfe44d8b2429d43e",
       "frameworkVersion": "3.32.1",
       "verification": {
         "rounds": 1,
@@ -66,15 +88,6 @@
         "verifierProvider": "openai",
         "transport": "api"
       }
-    },
-    {
-      "number": 4,
-      "title": "Domain model",
-      "status": "not-started",
-      "startedAt": null,
-      "completedAt": null,
-      "orchestrator": null,
-      "verificationVerdict": null
     },
     {
       "number": 5,

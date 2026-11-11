@@ -22,6 +22,13 @@
       "dateTime": "2026-11-11T08:31:10.061000-05:00",
       "task": "Lay down the solution skeleton: CsvParser.slnx and five SDK-style net10.0 projects (src/PersonModel, src/CsvDeserializer, src/CsvDatabase, src/CsvParserApp as an Exe with a placeholder Program.cs, tests/CsvParser.Tests with xUnit and the test SDK referencing all four), wired with the ProjectReference graph from the plan (CsvDeserializer and CsvDatabase reference PersonModel; CsvParserApp references all three libraries). Then declare the 'dotnet' test suite in dabbler.yaml under testing.suites. No packages beyond xUnit and the test SDK.",
       "releasable": false
+    },
+    {
+      "kind": "task-declaration",
+      "sessionNumber": 4,
+      "dateTime": "2026-11-11T08:34:14.359000-05:00",
+      "task": "Add the Person domain record in src/PersonModel/Person.cs (public record Person(int Id, string Name, string Email, int Age), no packages, no EF Core attributes) and cover it with tests in tests/CsvParser.Tests/PersonTests.cs for value equality, the default Id of 0 and ToString. Both projects already exist and reference each other, so no project files change.",
+      "releasable": false
     }
   ]
 }

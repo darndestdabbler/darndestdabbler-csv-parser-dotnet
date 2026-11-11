@@ -15,7 +15,7 @@ The numbered sessions are declared from `session-plan.md`; each one's task is wh
 | 1 | Author or import the solution plan | no | 2026-11-11 |
 | 2 | Challenge the plan, then break it into numbered sessions | no | 2026-11-11 |
 | 3 | Skeleton | no | 2026-11-11 |
-| 4 | Domain model | — | not declared |
+| 4 | Domain model | no | 2026-11-11 |
 | 5 | CSV deserialization | — | not declared |
 | 6 | Database layer | — | not declared |
 | 7 | Console application | — | not declared |
@@ -37,3 +37,9 @@ Challenge the cuts in docs/planning/solution-plan.md (each module's existence, p
 **Releasable: no.**
 
 Lay down the solution skeleton: CsvParser.slnx and five SDK-style net10.0 projects (src/PersonModel, src/CsvDeserializer, src/CsvDatabase, src/CsvParserApp as an Exe with a placeholder Program.cs, tests/CsvParser.Tests with xUnit and the test SDK referencing all four), wired with the ProjectReference graph from the plan (CsvDeserializer and CsvDatabase reference PersonModel; CsvParserApp references all three libraries). Then declare the 'dotnet' test suite in dabbler.yaml under testing.suites. No packages beyond xUnit and the test SDK.
+
+### Session 4 — Domain model
+
+**Releasable: no.**
+
+Add the Person domain record in src/PersonModel/Person.cs (public record Person(int Id, string Name, string Email, int Age), no packages, no EF Core attributes) and cover it with tests in tests/CsvParser.Tests/PersonTests.cs for value equality, the default Id of 0 and ToString. Both projects already exist and reference each other, so no project files change.
