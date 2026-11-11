@@ -102,17 +102,39 @@
         "identityProvenance": "direct"
       },
       "verificationVerdict": "VERIFIED",
-      "startCommit": "cef5a765ef957567ac00aa610e0739b93a7e8529",
-      "frameworkVersion": "3.32.1",
       "verification": {
         "rounds": 3,
+        "verifierModel": "gpt-5.6-terra",
+        "verifierProvider": "openai",
+        "transport": "api"
+      },
+      "frameworkVersion": "3.32.1",
+      "startCommit": "cef5a765ef957567ac00aa610e0739b93a7e8529"
+    },
+    {
+      "number": 6,
+      "title": "Test hardening for the model and the CSV reader",
+      "status": "in-progress",
+      "startedAt": "2026-11-11T08:49:57.014000-05:00",
+      "completedAt": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-haiku-5-5",
+        "identityProvenance": "direct"
+      },
+      "verificationVerdict": "VERIFIED",
+      "startCommit": "7bad1d14cfe7103d509f5ec7ed0495e2c20ce25c",
+      "frameworkVersion": "3.32.1",
+      "verification": {
+        "rounds": 1,
         "verifierModel": "gpt-5.6-terra",
         "verifierProvider": "openai",
         "transport": "api"
       }
     },
     {
-      "number": 6,
+      "number": 7,
       "title": "Database layer",
       "status": "not-started",
       "startedAt": null,
@@ -121,7 +143,7 @@
       "verificationVerdict": null
     },
     {
-      "number": 7,
+      "number": 8,
       "title": "Console application",
       "status": "not-started",
       "startedAt": null,
