@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session 001 transcript</title>
+<style>
+:root {
+  --page: #ffffff;
+  --ink: #1f1f1f;
+  --faint: #e4e4e4;
+  --panel: #f6f6f6;
+  --tone-milestone: #2a5db0;
+  --tone-good: #256029;
+  --tone-warn: #8a6100;
+  --tone-bad: #a31515;
+  --tone-muted: #6b6b6b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #1e1e1e;
+    --ink: #d4d4d4;
+    --faint: #3a3a3a;
+    --panel: #252526;
+  --tone-milestone: #3874db;
+  --tone-good: #54a33b;
+  --tone-warn: #b79427;
+  --tone-bad: #f14c4c;
+  --tone-muted: #8c8c8c;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 24px 16px 64px;
+  background: var(--page);
+  color: var(--ink);
+  font: 14px/1.6 ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+}
+main { max-width: 68rem; margin: 0 auto; }
+h1 { font-size: 1.4rem; margin: 0 0 .25rem; }
+h2 { font-size: 1.05rem; margin: 2.5rem 0 .75rem; border-bottom: 1px solid var(--faint); padding-bottom: .3rem; }
+.stamp { color: var(--tone-muted); font-size: .85rem; margin: 0 0 .25rem; }
+.mono, pre, code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+.lines { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13px; }
+.line { white-space: pre-wrap; word-break: break-word; padding-left: 10.5ch; text-indent: -10.5ch; }
+.at { color: var(--tone-muted); }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: left; padding: .35rem .6rem; border-bottom: 1px solid var(--faint); vertical-align: top; }
+th { color: var(--tone-muted); font-weight: 600; }
+details { margin: .5rem 0; }
+summary { cursor: pointer; }
+td details { margin: 0; }
+tr:has(details:not([open])) + tr.findings { display: none; }
+tr.findings > td { padding: 0 0 .5rem 1.5rem; }
+pre { background: var(--panel); padding: .75rem; overflow-x: auto; white-space: pre-wrap; word-break: break-word; font-size: 12.5px; }
+.stop, .cancelled { border-left: 3px solid var(--tone-bad); background: var(--panel); padding: .6rem .9rem; }
+.milestone { color: var(--tone-milestone); }
+.good { color: var(--tone-good); }
+.warn { color: var(--tone-warn); }
+.bad { color: var(--tone-bad); }
+.muted { color: var(--tone-muted); }
+</style>
+</head>
+<body>
+<main>
+<h1>Session 001 transcript</h1>
+<p class="stamp">Rendered 2026-11-11T13:23:15.605Z by dabbler-ai-router 3.32.1 at e2b50ee8d3e55f9954da4da522b361b1f294467a.</p>
+<p class="stamp">Engine cli, last phase <span class="milestone">log</span>, started 2026-11-11T08:16:02.252-05:00.</p>
+<h2>Session Plan</h2>
+<h3>Session 1: Author or import the solution plan</h3>
+<ol><li>Register.</li><li>The brief is the prompt this session was started with, or <code>docs/planning/brief.md</code>: what the solution is — its purpose, who uses it, what it must do and what is out of scope, what success looks like, and whether a plan or notes already exist. With neither, ask the person who started the session for it and write their answer to that path before any work. The plan's substance is theirs: do not search neighbouring directories for one, and do not draft one from the folder name. Before any module is proposed, ask them how production is split: what runs separately in production, and which part may talk to the database? Offer the default -- an application tier that calls an API tier, and only the API tier talks to the database. Then create — or import — <code>docs/planning/solution-plan.md</code>: the objective a reader can act on; the *Production split* they answered; the *Handoff artifacts*, what each separately running part is handed over as, with the standard command for its form -- for .NET an IIS site package (<code>dotnet publish</code>) or a Windows Service (a Worker Service published for a service host), for Java a runnable jar or a war (<code>mvn package</code> writing into <code>{output}</code>, which <code>packaging.pack</code> requires -- say through a property the POM's jar or war plugin takes as its output directory, <code>-Dhandoff.dir={output}</code>) or an image (Spring Boot's <code>build-image</code>), for the database a SQL migration script (<code>dotnet ef migrations script --idempotent</code>); the real form is produced later, and a tutorial produces the easiest one to test; the modules, with what each is responsible for, the contract each exposes (what must be true going in, what is guaranteed coming out, how it fails), the dependency direction, the reason for each cut and the cuts deferred — one module is a fine answer, and most small solutions are one; and the phases or feature areas with their key deliverables, each scoped to a handful of focused AI sessions. A repository that already has <code>docs/planning/project-plan.md</code> amends that file instead.</li><li>Where the plan has several modules, say in it how each is a project: a <code>.csproj</code> listed in the root solution file for .NET, or a Maven module listed in the parent <code>pom.xml</code>, each reaching a sibling by project reference -- a <code>&lt;ProjectReference&gt;</code>, or a dependency at <code>${project.version}</code>. The first numbered session, the skeleton, writes the projects.</li></ol>
+<p>The framework then verifies the work cross-provider, runs the suites as the run of record and closes the session. These are the framework's, not steps to plan.</p>
+<p>This session writes the plan and nothing else: it creates, edits or deletes no code, project, build file, test, <code>dabbler.yaml</code> suite or packaging.</p>
+<p><strong>Creates:</strong> <code>docs/planning/solution-plan.md</code>. A later revision is just another plan session that amends the same file.</p>
+<h2>Work Plan</h2>
+<p>Author the solution plan for csv-parser-dotnet, a .NET 10 port of the csv-parser-java learning exercise. First record the person's brief in docs/planning/brief.md: the Java project's brief (a console app that reads CSV files from a folder, deserializes them into Person objects, persists them and displays every stored record), restated for .NET 10, SQL Server through Entity Framework Core instead of H2, LocalDB as the reachable server, and a sample that never goes into production. Then write docs/planning/solution-plan.md: the objective; a Production split stating there is none (one console process, the only part that talks to the database); the Handoff artifacts (the console app as <code>dotnet publish</code> output, the database as an idempotent EF Core migration script); the four modules as four .csproj projects in the root solution file reaching each other by &lt;ProjectReference&gt; (PersonModel, CsvDeserializer, CsvDatabase, CsvParserApp), each with responsibility, contract, dependency direction, the reason for the cut and the cuts deferred; the resolved decisions carried over from the Java plan (Person fields and CSV headers, database location, console output format); and the phases from the skeleton (session 3) to the console app (session 7).</p>
+<p>Landed <a href="https://github.com/darndestdabbler/darndestdabbler-csv-parser-dotnet/commit/107732998429ceac8e586d9360ca1e3a2cbd14a9"><code>107732998429ceac8e586d9360ca1e3a2cbd14a9</code></a>.</p>
+<table>
+<tr><th>Step</th><th>Ask</th><th>Files</th><th>Checks</th><th>Accepted</th></tr>
+<tr><td>Write brief</td><td><p>Write docs/planning/brief.md from the person's answer: the csv-parser-java brief restated for a .NET 10 console app, with SQL Server (LocalDB where reachable) through Entity Framework Core in place of H2, sections Purpose, Who Uses It, What It Must Do, Scope, Success Criteria, and a note that it is a sample exercising dabbler-ai-orchestration and never goes into production.</p></td><td><span class="mono">docs/planning/brief.md</span></td><td><code>node -e const t=require('fs').readFileSync('docs/planning/brief.md','utf8');const need=['## Purpose','## Who Uses It','## What It Must Do','## Scope','## Success Criteria','.NET 10','Entity Framework','SQL Server'];const miss=need.filter(h=&gt;!t.includes(h));if(miss.length){console.error('missing: '+miss.join(', '));process.exit(1)}</code></td><td>yes</td></tr>
+<tr><td>Write solution plan</td><td><p>Write docs/planning/solution-plan.md: Objective; Production Split (none -- one console process, which alone talks to the database); Handoff Artifacts (console app via <code>dotnet publish -c Release -o {output}</code>, database via <code>dotnet ef migrations script --idempotent</code>); Modules -- PersonModel (leaf: Person record with Id, Name, Email, Age), CsvDeserializer (reads every *.csv in a folder with CsvHelper, returns the valid Person list plus one error per skipped malformed record), CsvDatabase (EF Core SQL Server DbContext with migrations, save and list-all ordered by Id), CsvParserApp (console entry point: folder argument, connection string from an environment variable defaulting to LocalDB, applies migrations, prints <code>name | email | age</code> then one line per person) -- each with contract, dependencies, rationale and deferred cuts, and how each is a .csproj in the root solution reaching siblings by &lt;ProjectReference&gt;, with one xUnit test project; the dependency graph; resolved decisions; and phases for sessions 3 to 7 (skeleton, model, deserializer, database, console app).</p></td><td><span class="mono">docs/planning/solution-plan.md</span></td><td><code>node -e const t=require('fs').readFileSync('docs/planning/solution-plan.md','utf8');const need=['## Objective','## Production Split','## Handoff Artifacts','## Modules','PersonModel','CsvDeserializer','CsvDatabase','CsvParserApp','ProjectReference','## Dependency Graph','## Phases','dotnet publish','dotnet ef migrations script --idempotent','net10.0'];const miss=need.filter(h=&gt;!t.includes(h));if(miss.length){console.error('missing: '+miss.join(', '));process.exit(1)}</code></td><td>yes</td></tr>
+</table>
+<p>Non-goals:</p>
+<ul><li>No code, .csproj, solution file, test, dabbler.yaml suite or packaging block is created or changed: the skeleton session (session 3) writes the projects.</li><li>The plan is not broken into numbered sessions in session-plan.md and its cuts are not challenged here: that is session 2.</li><li>No release or packaging session is proposed: the brief puts release/packaging for distribution out of scope, as it does a production deployment architecture, a REST API or web UI, advanced validation and large-dataset performance.</li></ul>
+<h2>What the framework said</h2>
+<div class="lines"><div class="line"><span class="at">[13:16:02]</span> <span class="muted">run-started</span> session=001 mode=pull</div>
+<div class="line"><span class="at">[13:16:02]</span> <span class="muted">instruction-issued</span> seq=1 kind=step step=plan</div>
+<div class="line"><span class="at">[13:21:25]</span> <span class="muted">run-resumed</span> session=001 phase=<span class="milestone">plan</span> mode=pull</div>
+<div class="line"><span class="at">[13:21:25]</span> <span class="muted">plan-accepted</span> steps=[&quot;write-brief&quot;,&quot;write-solution-plan&quot;] non_goals=3</div>
+<div class="line"><span class="at">[13:21:25]</span> <span class="milestone">phase</span> phase=<span class="milestone">work</span></div>
+<div class="line"><span class="at">[13:21:26]</span> <span class="muted">instruction-issued</span> seq=2 kind=step step=write-brief</div>
+<div class="line"><span class="at">[13:21:39]</span> <span class="muted">run-resumed</span> session=001 phase=<span class="milestone">work</span> mode=pull</div>
+<div class="line"><span class="at">[13:21:39]</span> <span class="muted">check-passed</span> step=write-brief argv=[&quot;node&quot;,&quot;-e&quot;,&quot;const t=require('fs').readFileSync('docs/planning/brief.md','utf8');const need=['## Purpose','## Who Uses It','## What It Must Do','## Scope','## Success Criteria','.NET 10','Entity Framework','SQL Server'];const miss=need.filter(h=&gt;!t.includes(h));if(miss.length){console.error('missing: '+miss.join(', '));process.exit(1)}&quot;]</div>
+<div class="line"><span class="at">[13:21:39]</span> <span class="muted">report-accepted</span> seq=2 step=write-brief files=[&quot;docs/planning/brief.md&quot;] notes=Brief restated from csv-parser-java for .NET 10, SQL Server/LocalDB via EF Core, non-production sample</div>
+<div class="line"><span class="at">[13:21:39]</span> <span class="muted">instruction-issued</span> seq=3 kind=step step=write-solution-plan</div>
+<div class="line"><span class="at">[13:22:37]</span> <span class="muted">run-resumed</span> session=001 phase=<span class="milestone">work</span> mode=pull</div>
+<div class="line"><span class="at">[13:22:38]</span> <span class="muted">check-passed</span> step=write-solution-plan argv=[&quot;node&quot;,&quot;-e&quot;,&quot;const t=require('fs').readFileSync('docs/planning/solution-plan.md','utf8');const need=['## Objective','## Production Split','## Handoff Artifacts','## Modules','PersonModel','CsvDeserializer','CsvDatabase','CsvParserApp','ProjectReference','## Dependency Graph','## Phases','dotnet publish','dotnet ef migrations script --idempotent','net10.0'];const miss=need.filter(h=&gt;!t.includes(h));if(miss.length){console.error('missing: '+miss.join(', '));process.exit(1)}&quot;]</div>
+<div class="line"><span class="at">[13:22:38]</span> <span class="muted">report-accepted</span> seq=3 step=write-solution-plan files=[&quot;docs/planning/solution-plan.md&quot;] notes=Solution plan: four net10.0 projects in CsvParser.slnx, EF Core SQL Server/LocalDB, phases for sessions 3-7, no production split or release</div>
+<div class="line"><span class="at">[13:22:38]</span> <span class="milestone">phase</span> phase=<span class="milestone">preverify</span></div>
+<div class="line"><span class="at">[13:22:38]</span> <span class="milestone">phase</span> phase=<span class="milestone">verify</span></div>
+<div class="line"><span class="at">[13:22:38]</span> <span class="muted">job-started</span> name=verification pid=59536 log=.dabbler/runs/s1/driver/jobs/verification.log</div>
+<div class="line"><span class="at">[13:23:09]</span> <span class="muted">job-finished</span> name=verification exit=<span class="good">0</span> log=.dabbler/runs/s1/driver/jobs/verification.log</div>
+<div class="line"><span class="at">[13:23:09]</span> <span class="muted">verification-passed</span></div>
+<div class="line"><span class="at">[13:23:09]</span> <span class="milestone">phase</span> phase=<span class="milestone">run-of-record</span></div>
+<div class="line"><span class="at">[13:23:09]</span> <span class="muted">run-of-record-none</span> reason=no suite declared; nothing to run</div>
+<div class="line"><span class="at">[13:23:09]</span> <span class="milestone">phase</span> phase=<span class="milestone">land</span></div>
+<div class="line"><span class="at">[13:23:11]</span> <span class="muted">landed</span> commit=107732998429ceac8e586d9360ca1e3a2cbd14a9</div>
+<div class="line"><span class="at">[13:23:11]</span> <span class="milestone">phase</span> phase=<span class="milestone">publish</span></div>
+<div class="line"><span class="at">[13:23:11]</span> <span class="muted">publish-skipped</span> reason=an ordinary session never publishes</div>
+<div class="line"><span class="at">[13:23:11]</span> <span class="milestone">phase</span> phase=<span class="milestone">close</span></div>
+<div class="line"><span class="at">[13:23:12]</span> <span class="muted">job-started</span> name=close pid=43696 log=.dabbler/runs/s1/driver/jobs/close.log</div>
+<div class="line"><span class="at">[13:23:15]</span> <span class="muted">job-finished</span> name=close exit=<span class="good">0</span> log=.dabbler/runs/s1/driver/jobs/close.log</div>
+<div class="line"><span class="at">[13:23:15]</span> <span class="milestone">phase</span> phase=<span class="milestone">log</span></div></div>
+<h2>Verification</h2>
+<table>
+<tr><th>Round</th><th>Phase</th><th>Verdict</th><th>Reviewer</th><th>Provider</th><th>Transport</th><th>Findings</th></tr>
+<tr><td>1</td><td>full</td><td><span class="good">VERIFIED</span></td><td>gpt-5.6-terra</td><td>openai</td><td>api</td><td>0</td></tr>
+</table>
+<h2>Test runs</h2>
+<p>No test run was recorded.</p>
+<h2>Jobs</h2>
+<div><strong>close</strong> exit <span class="good">0</span> <span class="muted">(passed -- output not carried; dabbler transcript --full carries it)</span></div>
+<div><strong>verification</strong> exit <span class="good">0</span> <span class="muted">(passed -- output not carried; dabbler transcript --full carries it)</span></div>
+</main>
+</body>
+</html>
